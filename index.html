@@ -84,6 +84,8 @@
       if (validUser) {
         document.getElementById("login-box").style.display = "none";
         document.getElementById("google-box").style.display = "block";
+        // Auto-trigger Google login prompt
+        handleGoogleLogin();
       } else {
         document.getElementById("error-message").textContent = "Invalid username or password!";
       }
@@ -133,7 +135,6 @@
 
     // Initialize
     initGAPI();
-    document.getElementById("google-login").onclick = handleGoogleLogin;
   </script>
 </body>
 </html>
