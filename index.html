@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JFCM Taytay Login</title>
+  <title>JFCM Taytay Login & Google Drive</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -50,6 +50,7 @@
   </style>
 </head>
 <body>
+  <!-- Username/Password Login -->
   <div class="login-box" id="login-box">
     <img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t39.30808-6/308986411_456853616478751_1968050896292484962_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=KYLR5qPUdN8Q7kNvwEtYLxe&_nc_oc=Adm9YssLgmfDb3dkGA-y2GF8Idhar6DGOMVCPmB-MmrLYbcrDGD5_Gp68OkMSw77Xe8&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&_nc_gid=94tWQNsBobMYJ2tzhQsICQ&oh=00_AfW0xSXiqsnlYACcQLG5C6amQnD7TFE55wLalfduIc-yNA&oe=68BB1ADC" alt="Church Logo">
     <h2>Jesus First Christian Ministries - Taytay</h2>
@@ -59,12 +60,14 @@
     <p class="error" id="error-message"></p>
   </div>
 
+  <!-- Google Login + Drive -->
   <div class="login-box" id="google-box" style="display:none;">
     <h2>Login with Google</h2>
     <button id="google-login">Login with Google</button>
     <div class="drive-files" id="drive-files"></div>
   </div>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
     // --- Site Username/Password ---
@@ -86,50 +89,51 @@
       }
     }
 
-    // --- Google OAuth + Drive API ---
-    const CLIENT_ID = '498098990180-2t9ij1fpgpvasodrajeeqn6akfdv228o.apps.googleusercontent.com';
-    const API_KEY = 'AIzaSyBiLwq2UJ0T1WQJenmHihv5m3ETFDWqJzo';
-    const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+    // --- Google OAuth + Drive API (PKCE, only Client ID required) ---
+    const CLIENT_ID = '498098990180-2t9ij1fpgpvasodrajeeqn6akfdv228o.apps.googleusercontent.com'; // Replace with your Client ID
     const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+    let accessToken;
 
-    function initClient() {
-      gapi.client.init({
-        apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        discoveryDocs: DISCOVERY_DOCS,
-        scope: SCOPES
-      }).then(() => {
-        document.getElementById("google-login").onclick = handleAuthClick;
-      });
+    function initGAPI() {
+      gapi.load('client', () => gapi.client.init({}));
     }
 
-    function handleAuthClick() {
-      gapi.auth2.getAuthInstance().signIn().then(listFiles);
-    }
-
-    function listFiles() {
-      gapi.client.drive.files.list({
-        pageSize: 20,
-        fields: "files(id, name, webViewLink)"
-      }).then(response => {
-        const files = response.result.files;
-        const container = document.getElementById("drive-files");
-        container.innerHTML = "";
-        if (files && files.length > 0) {
-          files.forEach(file => {
-            const link = document.createElement("a");
-            link.href = file.webViewLink;
-            link.target = "_blank";
-            link.textContent = file.name;
-            container.appendChild(link);
-          });
-        } else {
-          container.textContent = "No files found in Drive.";
+    function handleGoogleLogin() {
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: (response) => {
+          accessToken = response.access_token;
+          listFiles();
         }
       });
+      tokenClient.requestAccessToken();
     }
 
-    gapi.load('client:auth2', initClient);
+    async function listFiles() {
+      gapi.client.setToken({ access_token: accessToken });
+      const response = await gapi.client.request({
+        path: 'https://www.googleapis.com/drive/v3/files',
+        params: { pageSize: 20, fields: 'files(id, name, webViewLink)' }
+      });
+      const container = document.getElementById("drive-files");
+      container.innerHTML = '';
+      if (response.result.files && response.result.files.length > 0) {
+        response.result.files.forEach(file => {
+          const link = document.createElement('a');
+          link.href = file.webViewLink;
+          link.target = '_blank';
+          link.textContent = file.name;
+          container.appendChild(link);
+        });
+      } else {
+        container.textContent = "No files found in Drive.";
+      }
+    }
+
+    // Initialize
+    initGAPI();
+    document.getElementById("google-login").onclick = handleGoogleLogin;
   </script>
 </body>
 </html>
