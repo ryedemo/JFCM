@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -6,19 +7,17 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-   body {
-  font-family: 'Segoe UI', sans-serif;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* Fade effect from top (transparent) to bottom (dark) */
-  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7)),
-              url('https://scontent.fmnl17-4.fna.fbcdn.net/v/t39.30808-6/476758085_1025079269656180_1508840151996929921_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=_ReU3GkJs5AQ7kNvwFJtgKv&_nc_oc=AdlPpscxYoBe9g4Dae6SXd8SP9S1_ioA207PYbYorCAA2QByrjCRxwWvleUdvUgoz7A&_nc_zt=23&_nc_ht=scontent.fmnl17-4.fna&_nc_gid=IJs6CRB_3-4tiip30yaB-Q&oh=00_AfUaAJAsEM1bu2MGoqc3nHFzGJXwRrAhdjpIYEt8dadGmQ&oe=68BB3577') 
-              no-repeat center center/cover;
-  position: relative;
-}
-
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7)),
+                  url('https://scontent.fmnl17-4.fna.fbcdn.net/v/t39.30808-6/476758085_1025079269656180_1508840151996929921_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=_ReU3GkJs5AQ7kNvwFJtgKv&_nc_oc=AdlPpscxYoBe9g4Dae6SXd8SP9S1_ioA207PYbYorCAA2QByrjCRxwWvleUdvUgoz7A&_nc_zt=23&_nc_ht=scontent.fmnl17-4.fna&_nc_gid=IJs6CRB_3-4tiip30yaB-Q&oh=00_AfUaAJAsEM1bu2MGoqc3nHFzGJXwRrAhdjpIYEt8dadGmQ&oe=68BB3577') 
+                  no-repeat center center/cover;
+      position: relative;
+    }
 
     .login-box {
       position: relative;
@@ -95,16 +94,13 @@
         padding: 40px 30px;
         width: 90%;
       }
-
       .login-box h2 {
         font-size: 1.4rem;
       }
-
       input {
         padding: 14px;
         font-size: 1rem;
       }
-
       button {
         padding: 14px;
         font-size: 1rem;
@@ -118,11 +114,15 @@
     <h2>Jesus First Christian Ministries - Taytay</h2>
     <input type="text" id="username" placeholder="Enter Username">
     <input type="password" id="password" placeholder="Enter Password">
-    <button onclick="login()">Login</button>
+    <button onclick="login()">Login with Site Account</button>
+    <button onclick="handleAuthClick()">Login with Google</button>
     <p class="error" id="error-message"></p>
   </div>
 
+  <!-- Google API script -->
+  <script src="https://apis.google.com/js/api.js"></script>
   <script>
+    // Hardcoded site users
     const users = [
       { username: "user1", password: "pass123" },
       { username: "user2", password: "456pass" },
@@ -147,8 +147,26 @@
         document.getElementById("error-message").textContent = "Invalid username or password!";
       }
     }
+
+    // Google OAuth client setup
+    function initClient() {
+      gapi.client.init({
+        apiKey: 'AIzaSyBiLwq2UJ0T1WQJenmHihv5m3ETFDWqJzo',
+        clientId: '498098990180-2t9ij1fpgpvasodrajeeqn6akfdv228o.apps.googleusercontent.com',
+        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+        scope: 'https://www.googleapis.com/auth/drive.readonly'
+      });
+    }
+
+    gapi.load('client:auth2', initClient);
+
+    function handleAuthClick() {
+      const authInstance = gapi.auth2.getAuthInstance();
+      authInstance.signIn().then(user => {
+        alert('Google Login successful!');
+        // You can list files or redirect user here
+      });
+    }
   </script>
 </body>
 </html>
-
-
