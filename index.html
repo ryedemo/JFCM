@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JFCM Taytay Login & Google Drive</title>
+  <title>JFCM Taytay Login</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -50,7 +50,7 @@
   </style>
 </head>
 <body>
-  <!-- Username/Password Login -->
+  <!-- Login Box -->
   <div class="login-box" id="login-box">
     <img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t39.30808-6/308986411_456853616478751_1968050896292484962_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=KYLR5qPUdN8Q7kNvwEtYLxe&_nc_oc=Adm9YssLgmfDb3dkGA-y2GF8Idhar6DGOMVCPmB-MmrLYbcrDGD5_Gp68OkMSw77Xe8&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&_nc_gid=94tWQNsBobMYJ2tzhQsICQ&oh=00_AfW0xSXiqsnlYACcQLG5C6amQnD7TFE55wLalfduIc-yNA&oe=68BB1ADC" alt="Church Logo">
     <h2>Jesus First Christian Ministries - Taytay</h2>
@@ -60,15 +60,12 @@
     <p class="error" id="error-message"></p>
   </div>
 
-  <!-- Google Login + Drive -->
-  <div class="login-box" id="google-box" style="display:none;">
-    <h2>Login with Google</h2>
-    <button id="google-login">Login with Google</button>
+  <!-- Drive Box -->
+  <div class="login-box" id="drive-box" style="display:none;">
+    <h2>Drive Files</h2>
     <div class="drive-files" id="drive-files"></div>
   </div>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://apis.google.com/js/api.js"></script>
   <script>
     // --- Site Username/Password ---
     const users = [
@@ -83,58 +80,34 @@
 
       if (validUser) {
         document.getElementById("login-box").style.display = "none";
-        document.getElementById("google-box").style.display = "block";
-        // Auto-trigger Google login prompt
-        handleGoogleLogin();
+        document.getElementById("drive-box").style.display = "block";
+        loadFiles();
       } else {
         document.getElementById("error-message").textContent = "Invalid username or password!";
       }
     }
 
-    // --- Google OAuth + Drive API (PKCE, only Client ID required) ---
-    const CLIENT_ID = '498098990180-2t9ij1fpgpvasodrajeeqn6akfdv228o.apps.googleusercontent.com'; // Replace with your Client ID
-    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
-    let accessToken;
+    // --- Load Drive files from JSON ---
+    async function loadFiles() {
+      try {
+        const response = await fetch('files.json'); // Make sure files.json is in same folder
+        const files = await response.json();
+        const container = document.getElementById('drive-files');
+        container.innerHTML = '';
 
-    function initGAPI() {
-      gapi.load('client', () => gapi.client.init({}));
-    }
-
-    function handleGoogleLogin() {
-      const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: (response) => {
-          accessToken = response.access_token;
-          listFiles();
-        }
-      });
-      tokenClient.requestAccessToken();
-    }
-
-    async function listFiles() {
-      gapi.client.setToken({ access_token: accessToken });
-      const response = await gapi.client.request({
-        path: 'https://www.googleapis.com/drive/v3/files',
-        params: { pageSize: 20, fields: 'files(id, name, webViewLink)' }
-      });
-      const container = document.getElementById("drive-files");
-      container.innerHTML = '';
-      if (response.result.files && response.result.files.length > 0) {
-        response.result.files.forEach(file => {
+        files.forEach(file => {
           const link = document.createElement('a');
-          link.href = file.webViewLink;
-          link.target = '_blank';
+          link.href = file.link;
           link.textContent = file.name;
+          link.target = '_blank';
           container.appendChild(link);
         });
-      } else {
-        container.textContent = "No files found in Drive.";
+
+      } catch (err) {
+        document.getElementById('drive-files').textContent = 'Error loading files.';
+        console.error(err);
       }
     }
-
-    // Initialize
-    initGAPI();
   </script>
 </body>
 </html>
