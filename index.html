@@ -6,7 +6,6 @@
   <title>JFCM Taytay Login</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Segoe UI', sans-serif;
       height: 100vh;
@@ -20,7 +19,6 @@
     }
 
     .login-box {
-      position: relative;
       background: rgba(255,255,255,0.97);
       padding: 60px 50px;
       border-radius: 30px;
@@ -31,142 +29,107 @@
       animation: fadeIn 1s ease-in-out;
     }
 
-    .login-box img {
-      width: 130px;
-      border-radius: 50%;
-      margin-bottom: 30px;
-      border: 4px solid #2e7d32;
-    }
+    .login-box img { width: 130px; border-radius: 50%; margin-bottom: 30px; border: 4px solid #2e7d32; }
+    .login-box h2 { margin-bottom: 30px; color: #2e7d32; font-size: 1.6rem; }
+    input { width: 95%; padding: 16px; margin: 12px 0; border: 1px solid #ccc; border-radius: 15px; outline: none; font-size: 1.1rem; transition: 0.3s; }
+    input:focus { border-color: #2e7d32; box-shadow: 0 0 12px rgba(46,125,50,0.6); }
+    button { background: #2e7d32; color: white; border: none; padding: 16px; border-radius: 15px; cursor: pointer; width: 100%; font-size: 1.1rem; transition: 0.3s; margin-top: 16px; }
+    button:hover { background: #14532d; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .error { color: red; margin-top: 15px; font-size: 1rem; }
+    .drive-files { margin-top: 20px; text-align: left; max-height: 300px; overflow-y: auto; }
+    .drive-files a { display: block; color: #2e7d32; margin-bottom: 8px; text-decoration: none; }
+    .drive-files a:hover { text-decoration: underline; }
 
-    .login-box h2 {
-      margin-bottom: 30px;
-      color: #2e7d32;
-      font-size: 1.6rem;
-    }
-
-    input {
-      width: 95%;
-      padding: 16px;
-      margin: 12px 0;
-      border: 1px solid #ccc;
-      border-radius: 15px;
-      outline: none;
-      font-size: 1.1rem;
-      transition: 0.3s;
-    }
-
-    input:focus {
-      border-color: #2e7d32;
-      box-shadow: 0 0 12px rgba(46,125,50,0.6);
-    }
-
-    button {
-      background: #2e7d32;
-      color: white;
-      border: none;
-      padding: 16px;
-      border-radius: 15px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 1.1rem;
-      transition: 0.3s;
-      margin-top: 16px;
-    }
-
-    button:hover {
-      background: #14532d;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    }
-
-    .error {
-      color: red;
-      margin-top: 15px;
-      font-size: 1rem;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     @media (max-width: 600px) {
-      .login-box {
-        padding: 40px 30px;
-        width: 90%;
-      }
-      .login-box h2 {
-        font-size: 1.4rem;
-      }
-      input {
-        padding: 14px;
-        font-size: 1rem;
-      }
-      button {
-        padding: 14px;
-        font-size: 1rem;
-      }
+      .login-box { padding: 40px 30px; width: 90%; }
+      .login-box h2 { font-size: 1.4rem; }
+      input { padding: 14px; font-size: 1rem; }
+      button { padding: 14px; font-size: 1rem; }
     }
   </style>
 </head>
 <body>
-  <div class="login-box">
+  <div class="login-box" id="login-box">
     <img src="https://scontent.fmnl17-2.fna.fbcdn.net/v/t39.30808-6/308986411_456853616478751_1968050896292484962_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=KYLR5qPUdN8Q7kNvwEtYLxe&_nc_oc=Adm9YssLgmfDb3dkGA-y2GF8Idhar6DGOMVCPmB-MmrLYbcrDGD5_Gp68OkMSw77Xe8&_nc_zt=23&_nc_ht=scontent.fmnl17-2.fna&_nc_gid=94tWQNsBobMYJ2tzhQsICQ&oh=00_AfW0xSXiqsnlYACcQLG5C6amQnD7TFE55wLalfduIc-yNA&oe=68BB1ADC" alt="Church Logo">
     <h2>Jesus First Christian Ministries - Taytay</h2>
     <input type="text" id="username" placeholder="Enter Username">
     <input type="password" id="password" placeholder="Enter Password">
-    <button onclick="login()">Login with Site Account</button>
-    <button onclick="handleAuthClick()">Login with Google</button>
+    <button onclick="siteLogin()">Login</button>
     <p class="error" id="error-message"></p>
   </div>
 
-  <!-- Google API script -->
+  <div class="login-box" id="google-box" style="display:none;">
+    <h2>Login with Google</h2>
+    <button id="google-login">Login with Google</button>
+    <div class="drive-files" id="drive-files"></div>
+  </div>
+
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
-    // Hardcoded site users
+    // --- Site Username/Password ---
     const users = [
       { username: "user1", password: "pass123" },
       { username: "user2", password: "456pass" },
-      { username: "user3", password: "welcome3" },
-      { username: "user4", password: "secret4" },
-      { username: "user5", password: "qwerty5" },
-      { username: "user6", password: "mypass6" },
-      { username: "user7", password: "login777" },
-      { username: "user8", password: "testpass8" },
-      { username: "user9", password: "9password" },
-      { username: "user10", password: "admin10" }
     ];
 
-    function login() {
+    function siteLogin() {
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
-      const validUser = users.find(user => user.username === username && user.password === password);
+      const validUser = users.find(u => u.username === username && u.password === password);
 
       if (validUser) {
-        window.location.href = "https://drive.google.com/drive/folders/1C43FvXt3pck1fbBit1jgOoIMYU8eQzCz?usp=sharing";
+        document.getElementById("login-box").style.display = "none";
+        document.getElementById("google-box").style.display = "block";
       } else {
         document.getElementById("error-message").textContent = "Invalid username or password!";
       }
     }
 
-    // Google OAuth client setup
+    // --- Google OAuth + Drive API ---
+    const CLIENT_ID = '498098990180-2t9ij1fpgpvasodrajeeqn6akfdv228o.apps.googleusercontent.com';
+    const API_KEY = 'AIzaSyBiLwq2UJ0T1WQJenmHihv5m3ETFDWqJzo';
+    const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+
     function initClient() {
       gapi.client.init({
-        apiKey: 'AIzaSyBiLwq2UJ0T1WQJenmHihv5m3ETFDWqJzo',
-        clientId: '498098990180-2t9ij1fpgpvasodrajeeqn6akfdv228o.apps.googleusercontent.com',
-        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-        scope: 'https://www.googleapis.com/auth/drive.readonly'
+        apiKey: API_KEY,
+        clientId: CLIENT_ID,
+        discoveryDocs: DISCOVERY_DOCS,
+        scope: SCOPES
+      }).then(() => {
+        document.getElementById("google-login").onclick = handleAuthClick;
+      });
+    }
+
+    function handleAuthClick() {
+      gapi.auth2.getAuthInstance().signIn().then(listFiles);
+    }
+
+    function listFiles() {
+      gapi.client.drive.files.list({
+        pageSize: 20,
+        fields: "files(id, name, webViewLink)"
+      }).then(response => {
+        const files = response.result.files;
+        const container = document.getElementById("drive-files");
+        container.innerHTML = "";
+        if (files && files.length > 0) {
+          files.forEach(file => {
+            const link = document.createElement("a");
+            link.href = file.webViewLink;
+            link.target = "_blank";
+            link.textContent = file.name;
+            container.appendChild(link);
+          });
+        } else {
+          container.textContent = "No files found in Drive.";
+        }
       });
     }
 
     gapi.load('client:auth2', initClient);
-
-    function handleAuthClick() {
-      const authInstance = gapi.auth2.getAuthInstance();
-      authInstance.signIn().then(user => {
-        alert('Google Login successful!');
-        // You can list files or redirect user here
-      });
-    }
   </script>
 </body>
 </html>
