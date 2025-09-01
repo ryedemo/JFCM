@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OAuth Callback</title>
+</head>
+<body>
+  <script>
+    // This will handle the OAuth redirect
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    console.log('Authorization code:', code);
+    // You can now exchange this code for an access token
+  </script>
+</body>
+</html>
